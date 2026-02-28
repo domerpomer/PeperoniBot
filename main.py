@@ -7,14 +7,14 @@ from creds import TG_TOKEN
 bot = telebot.TeleBot(TG_TOKEN)
 
 list_commands = ['/start']
-dict_players = {}
+dict_players = {449182895:'Richard', 340041815:'Kamil', 6592001230:'Damir', 408119: 'ymid', 316889: 'udaf', 658390: 'nhoe', 169827: 'qgvg', 336413: 'rwnr', 163730: 'hmin', 390260: 'feih', 397265: 'jvjv', 150994: 'kzwr', 519865: 'gidt', 779129: 'sqmw', 408264: 'zrmf', 280381: 'tgui', 827189: 'pkui', 759269: 'hyes', 756885: 'wgjh', 904749: 'xpep', 441279: 'typz', 135449: 'iimi', 230851: 'fbfp', 290552: 'rajy', 915393: 'iast', 759081: 'hibf', 913096: 'rryf', 588067: 'zgbd', 166730: 'eftl', 794892: 'swzc', 870471: 'tgnf', 604801: 'klko', 713244: 'mjep', 657844: 'dzof', 424925: 'tmdm', 682286: 'srly', 766575: 'ydqz', 787946: 'hlfa', 103196: 'hoeu', 257323: 'logn', 792295: 'xodo', 654061: 'eziz', 254114: 'czpx', 272905: 'uqeu', 414007: 'qlwq', 518609: 'ymmo', 985885: 'wnxw', 633698: 'rhkj', 385232: 'ietz', 475315: 'bwil', 461430: 'dhin', 668270: 'jnaz', 427710: 'dksv'}
 list_imposter = []
 list_games = []
 game_time = ''
 game_name = ''
 list_guess_task = []
 list_task = ['0 голов', 'Взорвать 4 раза', 'Забей в свои ворота', 'Дойти до овертайма', '5 сейва', 'Squishy save', '3 ассиста',  'забить гол от кроссбара/штанги', 'посмтотерть кино']
-dict_guess_task ={}
+dict_guess_task = {449182895:'Richard', 340041815:'Kamil'}
 
 
 
@@ -160,18 +160,32 @@ def info(message):
             bot.send_message(chatids, f'{dict_players[message.chat.id]} начал игру!')
             bot.send_message(chatids, f'Твоя задача - {random_task}!')
     
+    
     elif message.text == 'Завершить раунд':
-        markup = types.InlineKeyboardMarkup()
+        list_player = list(dict_players.keys())
+        markup_task_complete = types.InlineKeyboardMarkup()
         btn1 = types.InlineKeyboardButton('Да', callback_data='give_point')
         btn2 = types.InlineKeyboardButton('Нет', callback_data='delete')
-        markup.row(btn1,btn2)
-        markup2 = types.ReplyKeyboardMarkup()
-        #for  in dict_guess_task:
-            #btn[i] = types.KeyboardButton(dict_guess_task[])
+        markup_task_complete.row(btn1,btn2)
+        markup_voit = types.ReplyKeyboardMarkup()
+        for i in range(0, len(list_player), 2):
+            if i + 1 < len(list_player):
+                print(dict_players[list_player[i]])
+                print(dict_players[list_player[i+1]])
+                btn_on_the_first_collumn = types.KeyboardButton(dict_players[list_player[i]])
+                btn_on_the_second_collumn = types.KeyboardButton(dict_players[list_player[i+1]])
+                markup_voit.row(btn_on_the_first_collumn, btn_on_the_second_collumn)
+            else:
+                btn_if_cnt_players_odd = types.KeyboardButton(dict_players[list_player[i]])
+                markup_voit.row(btn_if_cnt_players_odd)
+          
         for chatids in dict_players.keys():
-            bot.send_message(chatids, 'Ты выполнил задание?', reply_markup=markup)
-            bot.send_message(chatids, 'Проголосуй за задачу, которая ты думаешь ему выпала', reply_markup=markup2)
-            
+            bot.send_message(chatids, 'Ты выполнил задание?', reply_markup=markup_task_complete)
+            bot.send_message(chatids, 'Проголосуй за задачу, которая ты думаешь выпала человеку', reply_markup=markup_voit)
+
+    elif message.text == 'ID':
+        print(message.chat.id, message.from_user.first_name)
+
 
     
         

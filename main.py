@@ -241,10 +241,5 @@ def callback_message(callback):
         bot.send_message(callback.message.chat.id, f'Хай, {callback.from_user.first_name}!', reply_markup=markup)
     elif callback.data == 'give_point':
         dict_guess_task[callback.from_user.first_name] += 1
-        bot.delete_message(callback.message.chat.id, callback.message.message_id)
-#print(callback.chat.id)        
-#print(message.from_user.first_name)
-#print([attr for attr in dir(callback) if not attr.startswith('_')])
-#print(callback.from_user)
-#print(callback.chat.id)    
+        bot.delete_message(callback.message.chat.id, callback.message.message_id) 
 bot.polling(none_stop=True)

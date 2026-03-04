@@ -12,17 +12,18 @@ list_imposter = []
 list_games = []
 game_time = ''
 game_name = ''
-list_guess_task = []
-list_task = ['0 голов', 'Взорвать 4 раза', 'Забей в свои ворота', 'Дойти до овертайма', '5 сейва', 'Squishy save', '3 ассиста',  'забить гол от кроссбара/штанги', 'посмтотерть кино']
-dict_guess_task = {449182895:'Richard', 340041815:'Kamil'}
+
+#rocket league mini game guess task!
+list_task = ['0 голов', 'Взорвать 4 раза', 'Забей в свои ворота', 'Дойти до овертайма', '5 сейва', 'Squishy save', '3 ассиста',  'забить гол от кроссбара/штанги']
+dict_guess_task_id_x_players = {449182895:'Richard', 340041815:'Kamil', 6592001230:'Damir'}
+dict_guess_task_player_x_score = {'Ян': 67}
+dict_guess_task_player_x_task = {}
 
 
 
 
 @bot.message_handler(commands=['rocketleague'])
 def rocketleague(message):
-    if message.from_user.first_name not in dict_players.values():           #при запуске бота все добаляются в словарь = [их чат айди]:[имя]
-        dict_players[message.chat.id] = message.from_user.first_name
     markup = types.ReplyKeyboardMarkup()
     btn1 = types.KeyboardButton('Предатель')
     markup.row(btn1)
@@ -83,13 +84,8 @@ def info(message):
         bot.send_message(message.chat.id, 'Отправь название игры⬇(Либо воспользуйся кнопками!)', reply_markup=markup)
         bot.register_next_step_handler(message, get_game_name)
             
-    elif message.text.lower() == 'переподключиться':
-        if message.chat.id not in list_guess_task:
-            list_guess_task.append(message.chat.id)
-        if message.from_user.first_name not in dict_players.values():           
-            dict_players[message.chat.id] = message.from_user.first_name
-        if message.from_user.first_name not in dict_guess_task.keys():
-            dict_guess_task[message.from_user.first_name] = 0
+
+    
 
 
 
@@ -135,61 +131,118 @@ def info(message):
 
 
     elif message.text.lower() == 'guess task!':
+        if message.chat.id not in dict_guess_task_id_x_players.keys():
+            dict_guess_task_id_x_players[message.chat.id] = message.from_user.first_name
+        if message.chat.id not in dict_guess_task_player_x_score.keys():           
+            dict_guess_task_player_x_score[message.from_user.first_name] = 0
         markup = types.ReplyKeyboardMarkup()
         btn1 = types.KeyboardButton('Начинаем! (гуесс таск)')
-        btn2 = types.KeyboardButton('Переподключиться')
-        markup.row(btn1, btn2)
-        btn3 = types.KeyboardButton('Завершить раунд')
-        btn4 = types.KeyboardButton('Показать лидерборд')
-        markup.row(btn3, btn4)
+        markup.row(btn1)
+        #btn3 = types.KeyboardButton('Завершить раунд')
+        #btn4 = types.KeyboardButton('Показать лидерборд')
+        #markup.row(btn3, btn4)
         bot.send_message(message.chat.id, f'Хай, {message.from_user.first_name}! Занес в список игры! Когда все будут готовы нажми на кнопку', reply_markup=markup)
-        if message.chat.id not in list_guess_task:
-            list_guess_task.append(message.chat.id)
+        if message.chat.id not in dict_guess_task_id_x_players.keys():
+            dict_guess_task_id_x_players[message.chat.id] = message.from_user.first_name
+
+
+    
     
 
     elif message.text.lower() == 'начинаем! (гуесс таск)':
+        if message.chat.id not in dict_guess_task_id_x_players.keys():
+            dict_guess_task_id_x_players[message.chat.id] = message.from_user.first_name
+        if message.chat.id not in dict_guess_task_player_x_score.keys():           
+            dict_guess_task_player_x_score[message.from_user.first_name] = 0
+
+
         list_task_copy = list_task.copy()
-        random.shuffle(list_guess_task)
-        for chatids in list_guess_task:
+        for chatids in dict_guess_task_id_x_players.keys():
             try:
                 random_task = random.choice(list_task_copy)
                 list_task_copy.remove(random_task)
             except:
                 random_task = 'будь афк 5 минут незаметно'
             bot.send_message(chatids, f'Все задачи -{'\n'.join(list_task)}')
-            bot.send_message(chatids, f'{dict_players[message.chat.id]} начал игру!')
+            bot.send_message(chatids, f'{dict_guess_task_id_x_players[message.chat.id]} начал игру!')
             bot.send_message(chatids, f'Твоя задача - {random_task}!')
+            dict_guess_task_player_x_task[dict_guess_task_id_x_players[chatids]] = random_task
+    
+#     elif message.text.lower() == 'показать лидерборд':
+#         if message.chat.id not in dict_guess_task_id_x_players.keys():
+#             dict_guess_task_id_x_players[message.chat.id] = message.from_user.first_name
+#         if message.chat.id not in dict_guess_task_player_x_score.keys():           
+#             dict_guess_task_player_x_score[message.from_user.first_name] = 0
+#         ranked_list = [(player, score) for player, score in dict_guess_task_player_x_score.items()]
+#         ranked_list.sort(key=lambda x: -x[1])
+#         bot.send_message(message.chat.id, 'Таблица лидеров:')
+#         for i, (player, score) in enumerate(ranked_list):
+#             bot.send_message(message.chat.id, f'{i+1}. {player}: {score}')
+        
     
     
-    elif message.text == 'Завершить раунд':
-        list_player = list(dict_players.keys())
-        markup_task_complete = types.InlineKeyboardMarkup()
-        btn1 = types.InlineKeyboardButton('Да', callback_data='give_point')
-        btn2 = types.InlineKeyboardButton('Нет', callback_data='delete')
-        markup_task_complete.row(btn1,btn2)
-        markup_voit = types.ReplyKeyboardMarkup()
-        for i in range(0, len(list_player), 2):
-            if i + 1 < len(list_player):
-                print(dict_players[list_player[i]])
-                print(dict_players[list_player[i+1]])
-                btn_on_the_first_collumn = types.KeyboardButton(dict_players[list_player[i]])
-                btn_on_the_second_collumn = types.KeyboardButton(dict_players[list_player[i+1]])
-                markup_voit.row(btn_on_the_first_collumn, btn_on_the_second_collumn)
-            else:
-                btn_if_cnt_players_odd = types.KeyboardButton(dict_players[list_player[i]])
-                markup_voit.row(btn_if_cnt_players_odd)
+#     elif message.text == 'Завершить раунд':
+#         if message.chat.id not in dict_guess_task_id_x_players.keys():
+#             dict_guess_task_id_x_players[message.chat.id] = message.from_user.first_name
+#         if message.chat.id not in dict_guess_task_player_x_score.keys():           
+#             dict_guess_task_player_x_score[message.from_user.first_name] = 0
+#         list_player = list(dict_guess_task_id_x_players.keys())
+#         markup_task_complete = types.InlineKeyboardMarkup()
+#         btn1 = types.InlineKeyboardButton('Да', callback_data='give_point')
+#         btn2 = types.InlineKeyboardButton('Нет', callback_data='delete')
+#         markup_task_complete.row(btn1,btn2)
+        
           
-        for chatids in dict_players.keys():
-            bot.send_message(chatids, 'Ты выполнил задание?', reply_markup=markup_task_complete)
-            bot.send_message(chatids, 'Проголосуй за задачу, которая ты думаешь выпала человеку', reply_markup=markup_voit)
-
-    elif message.text == 'ID':
-        print(message.chat.id, message.from_user.first_name)
-
+#         for chatids in dict_guess_task_id_x_players.keys():
+#             bot.send_message(chatids, 'Ты выполнил задание?', reply_markup=markup_task_complete)
+#             for chatids2 in dict_guess_task_id_x_players.keys():
+#                 markup_voit = types.InlineKeyboardMarkup()
+#                 for i in range(0, len(list_task), 2):
+#                     if i + 1 < len(list_task):
+#                         btn_on_the_first_collumn = types.InlineKeyboardButton(list_task[i])
+#                         btn_on_the_second_collumn = types.InlineKeyboardButton(list_task[i+1])
+#                         markup_voit.row(btn_on_the_first_collumn, btn_on_the_second_collumn)
+#                     else:
+#                         btn_if_cnt_players_odd = types.InlineKeyboardButton(list_task[i])
+#                         markup_voit.row(btn_if_cnt_players_odd)
+#                     bot.send_message(chatids, f'Проголосуй за {dict_guess_task_id_x_players[chatids2]} и выбери его задачу', reply_markup=markup_voit)
+#                     #bot.register_next_step_handler(message, vote_for_a_task)
+    
 
     
+
+#     elif message.text == 'ID':
+#         print(message.chat.id, message.from_user.first_name)
+
+
+# def vote_for_a_task(message):
+#     if message.text in dict_guess_task_id_x_players.values():
+#         global player_voited
+#         player_voited = message.text
+#         markup_voit2 = types.InlineKeyboardMarkup()
+#         for i in range(0, len(list_task), 2):
+#             if i + 1 < len(list_task):
+#                 print(list_task[i])
+#                 print(list_task[i])
+#                 btn_on_the_first_collumn = types.InlineKeyboardButton(list_task[i])
+#                 btn_on_the_second_collumn = types.InlineKeyboardButton(list_task[i+1])
+#                 markup_voit2.row(btn_on_the_first_collumn, btn_on_the_second_collumn)
+#             else:
+#                 btn_if_cnt_players_odd = types.InlineKeyboardButton(list_task[i])
+#                 markup_voit2.row(btn_if_cnt_players_odd)
+#         bot.send_message(message.chat.id, 'Проголосуй за задачу, которая ты думаешь выпала человеку', reply_markup=markup_voit2)
+#         bot.register_next_step_handler(message, check_right_task)
+
+# def check_right_task(message):
+#     if message.text == dict_guess_task_player_x_task[player_voited]:
+#         bot.send_message(message.chat.id, 'Ты угадал. Получай очко')
+#         dict_guess_task_player_x_score[message.from_user.first_name] += 1
+#     else:
+#         bot.send_message(message.chat.id, 'Увы ты не угадал. Получай в очко')
         
 
+
+    
 def get_game_name(message):
     global game_name
     game_name = message.text
@@ -219,6 +272,8 @@ def callback_message(callback):
     elif callback.data == 'delete_name_from_list':
         bot.edit_message_text('Удалил!', callback.message.chat.id, callback.message.message_id)
         del dict_players[callback.message.chat.id]
+
+
     elif callback.data == 'yes':
         list_games.append(f'{callback.from_user.first_name} предлагает сыграть в {game_name} {game_time}. ')
         for i in range(7):
@@ -230,6 +285,8 @@ def callback_message(callback):
         markup.row(btn4)
         bot.send_message(callback.message.chat.id, f'Хай, {callback.from_user.first_name}!', reply_markup=markup)
         print(*list_games)
+
+
     elif callback.data == 'no':
         for i in range(7):
             bot.delete_message(callback.message.chat.id, callback.message.message_id-i)
@@ -239,7 +296,9 @@ def callback_message(callback):
         btn4 = types.KeyboardButton('🕹Предложить игру🎮')          
         markup.row(btn4)
         bot.send_message(callback.message.chat.id, f'Хай, {callback.from_user.first_name}!', reply_markup=markup)
+
+
     elif callback.data == 'give_point':
-        dict_guess_task[callback.from_user.first_name] += 1
+        dict_guess_task_player_x_score[callback.from_user.first_name] += 1
         bot.delete_message(callback.message.chat.id, callback.message.message_id) 
 bot.polling(none_stop=True)
